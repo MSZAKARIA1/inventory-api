@@ -139,12 +139,20 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # def save(self, *args, **kwargs):
+    #     if not self.pk:  # Calculate total_amount only for new orders
+    #         self.total_amount = sum(
+    #             item.price_at_purchase * item.quantity for item in self.items.all()
+    #         )
+    #     super().save(*args, **kwargs)
     def save(self, *args, **kwargs):
-        if not self.pk:  # Calculate total_amount only for new orders
+        is_new = self.pk is None  # Check if the order is new
+        super().save(*args, **kwargs)  # Save the Order instance first
+        if is_new:  # Calculate total_amount only after the order is saved
             self.total_amount = sum(
-                item.price_at_purchase * item.quantity for item in self.items.all()
-            )
-        super().save(*args, **kwargs)
+            item.price_at_purchase * item.quantity for item in self.items.all()
+        )
+        super().save(update_fields=["total_amount"])  # Save total_amount
 
 
 class OrderItem(models.Model):
