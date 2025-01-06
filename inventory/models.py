@@ -5,9 +5,6 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
 
-User = get_user_model()
-
-
 # Custom User model
 class RoleChoices(models.TextChoices):
     ADMIN = "admin", "Admin"
@@ -40,9 +37,10 @@ class User(AbstractUser):
         verbose_name_plural = "users"
 
 
-#  Token generation model
 class UserToken(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="token")
+    user = models.OneToOneField(
+        get_user_model(), on_delete=models.CASCADE, related_name="token"
+    )
     token = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -96,23 +94,19 @@ class Product(models.Model):
         validators=[MinValueValidator(0)],
         help_text="Reorder level. Default is 10.",
     )
-    # reorder_level = models.IntegerField(default=10)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def is_below_threshold(self):
-        """Check if stock quantity is below the threshold."""
         return self.stock_quantity < self.threshold
 
     def clean(self):
-        """Ensure threshold is valid."""
         if self.threshold < 0:
             raise ValidationError(
                 {"threshold": "Threshold must be a non-negative value."}
             )
 
     def save(self, *args, **kwargs):
-        """Validate threshold before saving."""
         self.clean()
         super().save(*args, **kwargs)
 
@@ -139,7 +133,9 @@ class Order(models.Model):
     total_amount = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
+    user = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, related_name="orders"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -178,13 +174,15 @@ class InventoryHistory(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="history"
     )
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(
+        get_user_model(), on_delete=models.SET_NULL, null=True, blank=True
+    )
     action = models.CharField(max_length=10, choices=ACTION_CHOICES)
     quantity_changed = models.IntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["-timestamp"]  # Default ordering by timestamp descending
+        ordering = ["-timestamp"]
 
     def __str__(self):
         user_name = self.user.username if self.user else "System"
