@@ -44,8 +44,27 @@ python manage.py runserver
 #Here are the various endpoints
 
 *********************Authentication*****************************
-https://inventory-api-da1c010c0f13.herokuapp.com/api/token/
-https://inventory-api-da1c010c0f13.herokuapp.com/api/token/refresh
+Authentication Setup
+The API uses Django's built-in authentication system with support for:
+
+Basic Authentication: Uses the username and password of registered users.
+JWT Authentication (Optional): Implements JSON Web Tokens using djangorestframework-simplejwt.
+
+########### How to Test Authentication ##########
+1. Prerequisites
+++++++++++ Ensure the Django development server is running:
+python manage.py runserver
+++++++++++ Create a user for testing:
+python manage.py createsuperuser
+
+************ Using JWT Authentication  ***********
+
+Development server:  http://127.0.0.1:8000/api/token/
+Production: https://inventory-api-da1c010c0f13.herokuapp.com/api/token/
+
+When the token expires you can obtain new token 
+Development Server: http://127.0.0.1:8000/api/token/refresh/
+Production https://inventory-api-da1c010c0f13.herokuapp.com/api/token/refresh
 
   *********************Inventory Management ***********************
  "users": "https://inventory-api-da1c010c0f13.herokuapp.com/api/users/",
